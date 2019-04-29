@@ -1,2 +1,2 @@
 # AWS-CF-EC2-Autopatcher
-to be defined
+Create tag based maintenance windows to update EC2 instances.
