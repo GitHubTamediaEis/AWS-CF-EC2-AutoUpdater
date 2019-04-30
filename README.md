@@ -9,6 +9,8 @@ This file is a CloudFormation template that creates the maintenance window.
 
 The solution is available in the [Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/userguide/end-user-console.html) of your account and can easily be deployed from there.
 
+**Make sure your instances meet the SSM Prerequisites, see section [Instance considerations](#instance-considerations)**
+
 Upon deployment you have to specify custom parameters which are explained hereafter.
 
 # Custom parameters
@@ -38,3 +40,7 @@ The maintenance window executes the following [Run Commands](https://docs.aws.am
 # Schedule considerations
 
 The schedule must be defined using a [Schedule Expression](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html). It's highly recommended to first test your expression for validity. You can do so by entering your expression as an Event Source in a [CloudWatch Rule](https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#rules:action=create) (Click *Schedule* and *Cron expression*, then enter your expression without *cron()*. The 10 next resulting trigger dates are then displayed.
+
+# Instance considerations
+
+Instances that should be autopatched must be listed in the [Managed Instances](https://console.aws.amazon.com/systems-manager/managed-instances?region=eu-west-1) list of AWS Systems Manager. To show up in this list, the instances must meet the [Systems Manager Prerequisites](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-prereqs.html).
