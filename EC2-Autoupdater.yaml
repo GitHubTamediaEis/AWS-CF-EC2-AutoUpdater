@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'EC2 Autoupdater: This template deploys a recurring maintenance window to update EC2 instances based on tags'
+Parameters:
+  Name:
+    Description: "Maintenance window name."
+    Type: String
+  Description:
+    Description: "Maintenance window description."
+    Type: String
+  Schedule:
+    Description: "Maintenance window schedule (cron/rate expression). Default is every last Saturday of the month at 01:00. Find more info here: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
+    Type: String
+    Default: "cron(0 1 ? * satL *)"
+  Duration:
+    Description: "Maintenance window duration (1-24 hours)."
+    Type: String
+    Default: 2
+  StopTasks:
+    Description: "Time to stop starting scheduled task before maintenance window ends (0-23 hours)."
+    Type: String
+    Default: 1
+  TimeZone:
+    Description: "Timezone applied to maintenance window executions."
+    Type: String
+    Default: Europe/Zurich
+  MaxConcurrency:
+    Description: "Number of targets on which to execute tasks at the same time."
+    Type: String
+    Default: 1
+  MaxErrors:
+    Description: "Stop tasks after it failed on the specified number of targets."
+    Type: String
+    Default: 0
+  TagName:
+    Description: "Tag name for instances to include as targets in the maintenance window."
+    Type: String
+    Default: landscape
+  TagValue:
+    Description: "Tag value for instances to include as targets in the maintenance window."
+    Type: String
+    Default: dev
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Window configuration
+      Parameters:
+      - Name
+      - Description
+      - Schedule
+      - Duration
+      - StopTasks
+      - TimeZone
+    - Label:
+        default: Target configuration
+      Parameters:
+      - MaxConcurrency
+      - MaxErrors
+      - TagName
+      - TagValue
+    
+Resources:
+  SSMMaintenanceWindowRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+            - ssm.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      Path: /
+  MaintenanceWindow:      
+    Type: AWS::SSM::MaintenanceWindow
+    Properties:
+      Description: !Ref Description
+      AllowUnassociatedTargets: false
+      Cutoff: !Ref StopTasks
+      Schedule: !Ref Schedule
+      ScheduleTimezone: !Ref TimeZone
+      Duration: !Ref Duration
+      Name: !Sub ${AWS::StackName}-${Name}
+  MaintenanceWindowTarget:
+    Type: AWS::SSM::MaintenanceWindowTarget
+    Properties:
+      WindowId: !Ref MaintenanceWindow
+      ResourceType: INSTANCE
+      Targets:
+        - Key: !Sub tag:${TagName}
+          Values:
+            - !Sub '${TagValue}'
+  UpdateSSMAgent:
+    Type: AWS::SSM::MaintenanceWindowTask
+    Properties:
+      MaxErrors: !Ref MaxErrors
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowRole.Arn
+      Priority: 1
+      MaxConcurrency: !Ref MaxConcurrency
+      Targets:
+        - Key: WindowTargetIds
+          Values:
+            - !Ref MaintenanceWindowTarget
+      TaskArn: AWS-UpdateSSMAgent
+      WindowId: !Ref MaintenanceWindow
+      TaskType: RUN_COMMAND
+  OSPatching:
+    Type: AWS::SSM::MaintenanceWindowTask
+    Properties:
+      MaxErrors: !Ref MaxErrors
+      ServiceRoleArn: !GetAtt SSMMaintenanceWindowRole.Arn
+      Priority: 2
+      MaxConcurrency: !Ref MaxConcurrency
+      Targets:
+        - Key: WindowTargetIds
+          Values:
+            - !Ref MaintenanceWindowTarget
+      TaskArn: AWS-RunPatchBaseline
+      TaskInvocationParameters:
+        MaintenanceWindowRunCommandParameters:
+          Parameters:
+            Operation: 
+              - Install
+      WindowId: !Ref MaintenanceWindow
+      TaskType: RUN_COMMAND
