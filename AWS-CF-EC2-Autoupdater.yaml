@@ -5,25 +5,28 @@ Parameters:
     Description: "Maintenance window name."
     Type: String
     AllowedPattern : ".+"
+    ConstraintDescription: "Window name can't be empty!"
   Description:
     Description: "Maintenance window description."
     Type: String
-    Default: ""
   Schedule:
     Description: "Maintenance window schedule (cron/rate expression). Default is every last Saturday of the month at 01:00. Find more info here: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
     Type: String
     Default: "cron(0 1 ? * satL *)"
     AllowedPattern : ".+"
+    ConstraintDescription: "Schedule can't be empty!"
   Duration:
     Description: "Maintenance window duration (1-24 hours)."
     Type: String
     Default: 2
-    AllowedPattern : ".+"
+    AllowedPattern : "^([1-9]|1[0-9]|2[0-4])$"
+    ConstraintDescription: "Duration must be between 1 and 24!"
   Cutoff:
     Description: "Time to stop starting scheduled task before maintenance window ends (0-23 hours)."
     Type: String
     Default: 1
-    AllowedPattern : ".+"
+    AllowedPattern : "^([0-9]|1[0-9]|2[0-3])$"
+    ConstraintDescription: "Cutoff must be between 0 and 23!"
   Timezone:
     Description: "Timezone applied to maintenance window executions."
     Type: String
@@ -50,6 +53,10 @@ Parameters:
     Default: dev
     AllowedPattern : ".+"
 
+Conditions:
+  # Check if description is set
+  DescriptionSet: !Not [!Equals ["", !Ref Description]]
+    
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -93,7 +100,8 @@ Resources:
   MaintenanceWindow:      
     Type: AWS::SSM::MaintenanceWindow
     Properties:
-      Description: !Ref Description
+      # If no description is set, set it to "-"
+      Description: !If [DescriptionSet, !Ref Description, "-"]
       AllowUnassociatedTargets: false
       Cutoff: !Ref Cutoff
       Schedule: !Ref Schedule
