@@ -8,6 +8,7 @@ Parameters:
   Description:
     Description: "Maintenance window description."
     Type: String
+    Default: ""
   Schedule:
     Description: "Maintenance window schedule (cron/rate expression). Default is every last Saturday of the month at 01:00. Find more info here: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
     Type: String
