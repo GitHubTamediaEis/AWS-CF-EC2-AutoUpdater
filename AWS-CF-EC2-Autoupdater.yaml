@@ -4,6 +4,7 @@ Parameters:
   Name:
     Description: "Maintenance window name."
     Type: String
+    AllowedPattern : ".+"
   Description:
     Description: "Maintenance window description."
     Type: String
@@ -11,34 +12,42 @@ Parameters:
     Description: "Maintenance window schedule (cron/rate expression). Default is every last Saturday of the month at 01:00. Find more info here: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
     Type: String
     Default: "cron(0 1 ? * satL *)"
+    AllowedPattern : ".+"
   Duration:
     Description: "Maintenance window duration (1-24 hours)."
     Type: String
     Default: 2
+    AllowedPattern : ".+"
   Cutoff:
     Description: "Time to stop starting scheduled task before maintenance window ends (0-23 hours)."
     Type: String
     Default: 1
+    AllowedPattern : ".+"
   Timezone:
     Description: "Timezone applied to maintenance window executions."
     Type: String
     Default: Europe/Zurich
+    AllowedPattern : ".+"
   MaxConcurrency:
     Description: "Number of targets on which to execute tasks at the same time."
     Type: String
     Default: 1
+    AllowedPattern : ".+"
   MaxErrors:
     Description: "Stop tasks after it failed on the specified number of targets."
     Type: String
     Default: 0
+    AllowedPattern : ".+"
   TagName:
     Description: "Tag name for instances to include as targets in the maintenance window."
     Type: String
     Default: landscape
+    AllowedPattern : ".+"
   TagValue:
     Description: "Tag value for instances to include as targets in the maintenance window."
     Type: String
     Default: dev
+    AllowedPattern : ".+"
 
 Metadata:
   AWS::CloudFormation::Interface:
