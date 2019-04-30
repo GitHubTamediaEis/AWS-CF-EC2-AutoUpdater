@@ -15,11 +15,11 @@ Parameters:
     Description: "Maintenance window duration (1-24 hours)."
     Type: String
     Default: 2
-  StopTasks:
+  Cutoff:
     Description: "Time to stop starting scheduled task before maintenance window ends (0-23 hours)."
     Type: String
     Default: 1
-  TimeZone:
+  Timezone:
     Description: "Timezone applied to maintenance window executions."
     Type: String
     Default: Europe/Zurich
@@ -50,13 +50,16 @@ Metadata:
       - Description
       - Schedule
       - Duration
-      - StopTasks
-      - TimeZone
+      - Cutoff
+      - Timezone
     - Label:
-        default: Target configuration
+        default: Task configuration
       Parameters:
       - MaxConcurrency
       - MaxErrors
+    - Label:
+        default: Target configuration
+      Parameters:
       - TagName
       - TagValue
     
@@ -82,9 +85,9 @@ Resources:
     Properties:
       Description: !Ref Description
       AllowUnassociatedTargets: false
-      Cutoff: !Ref StopTasks
+      Cutoff: !Ref Cutoff
       Schedule: !Ref Schedule
-      ScheduleTimezone: !Ref TimeZone
+      ScheduleTimezone: !Ref Timezone
       Duration: !Ref Duration
       Name: !Sub ${AWS::StackName}-${Name}
   MaintenanceWindowTarget:
