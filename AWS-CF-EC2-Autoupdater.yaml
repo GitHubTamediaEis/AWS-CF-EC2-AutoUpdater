@@ -51,7 +51,6 @@ Parameters:
     Description: "Tag values for instances to include as targets in the maintenance window."
     Type: CommaDelimitedList
     Default: dev
-    AllowedPattern : ".+"
 
 Conditions:
   # Check if description is set
@@ -115,7 +114,7 @@ Resources:
       ResourceType: INSTANCE
       Targets:
         - Key: !Sub tag:${TagName}
-          Values: !Sub '${TagValues}'
+          Values: !Ref TagValues
   UpdateSSMAgent:
     Type: AWS::SSM::MaintenanceWindowTask
     Properties:
