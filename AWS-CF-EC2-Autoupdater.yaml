@@ -47,9 +47,9 @@ Parameters:
     Type: String
     Default: landscape
     AllowedPattern : ".+"
-  TagValue:
-    Description: "Tag value for instances to include as targets in the maintenance window."
-    Type: String
+  TagValues:
+    Description: "Tag values for instances to include as targets in the maintenance window."
+    Type: CommaDelimitedList
     Default: dev
     AllowedPattern : ".+"
 
@@ -78,7 +78,7 @@ Metadata:
         default: Target configuration
       Parameters:
       - TagName
-      - TagValue
+      - TagValues
     
 Resources:
   SSMMaintenanceWindowRole:
@@ -115,8 +115,7 @@ Resources:
       ResourceType: INSTANCE
       Targets:
         - Key: !Sub tag:${TagName}
-          Values:
-            - !Sub '${TagValue}'
+          Values: !Sub '${TagValues}'
   UpdateSSMAgent:
     Type: AWS::SSM::MaintenanceWindowTask
     Properties:
