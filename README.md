@@ -28,7 +28,7 @@ All parameters except *Description* are required.
 |MaxConcurrency | 1 | Any positive number | Number of targets on which to execute tasks at the same time |
 |MaxErrors | 0 | 0 - any positive number | Stop tasks after it failed on the specified number of targets |
 |TagName | landscape | string | Tag name (key) for instances to include as targets in the maintenance window |
-|TagValue | dev | string | Tag value for instances to include as targets in the maintenance window |
+|TagValues | dev,int | CommaDelimitedList | Tag value(s) for instances to include as targets in the maintenance window |
 
 # Tasks
 
